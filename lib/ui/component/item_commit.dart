@@ -173,7 +173,7 @@ class _ItemCommit extends ConsumerState<ItemCommit> {
           'view',
           sprintf(t.menuViewOnProvider, [widget.gitProvider!.name]).toUpperCase(),
           t.menuViewOnProviderDesc,
-          enabled: widget.gitProvider?.isOAuthProvider == true && widget.remoteWebUrl != null,
+          enabled: widget.gitProvider?.isOAuthProvider == true && widget.remoteWebUrl != null && !widget.commit.unpushed,
         ),
       ],
     );
