@@ -654,6 +654,8 @@ class GitManager {
     if (_indexCorruptionPatterns.any((p) => errorStr.contains(p))) {
       final indexFile = File('$dirPath/$gitIndexPath');
       if (await indexFile.exists()) await indexFile.delete();
+      final lockFile = File('$dirPath/$gitLockPath');
+      if (await lockFile.exists()) await lockFile.delete();
       try {
         await GitManagerRs.recreateDeletedIndex(pathString: dirPath);
       } catch (e, stackTrace) {
@@ -730,6 +732,33 @@ class GitManager {
       },
     );
     return result ?? <GitManagerRs.Commit>[];
+  }
+
+  static Future<Map<String, (int, int)>> getCommitDiffStats(List<String> references, {int priority = 1, int? repoIndex}) async {
+    if (references.isEmpty) return {};
+    final result = await _runWithLock(
+      priority: priority,
+      GitManagerRs.stringListRunWithLock,
+      await _resolveRepoIndex(repoIndex),
+      LogType.CommitDiffStats,
+      (dirPath) async {
+        try {
+          return await GitManagerRs.getCommitDiffStats(pathString: dirPath, references: references, log: _logWrapper);
+        } catch (e, stackTrace) {
+          Logger.logError(LogType.CommitDiffStats, e, stackTrace);
+          return <String>[];
+        }
+      },
+    );
+    final stats = <String, (int, int)>{};
+    for (final entry in result ?? const <String>[]) {
+      final parts = entry.split("|");
+      if (parts.length != 3) continue;
+      final additions = int.tryParse(parts[1]) ?? 0;
+      final deletions = int.tryParse(parts[2]) ?? 0;
+      stats[parts[0]] = (additions, deletions);
+    }
+    return stats;
   }
 
   static Future<List<(String, GitManagerRs.ConflictType)>> getInitialConflicting() async {
@@ -1236,6 +1265,10 @@ class GitManager {
       if (await file.exists()) {
         await file.delete();
       }
+      final lockFile = File("$dirPath/$gitLockPath");
+      if (await lockFile.exists()) {
+        await lockFile.delete();
+      }
     });
   }
 
@@ -1243,6 +1276,8 @@ class GitManager {
     return await _runWithLock(GitManagerRs.voidRunWithLock, await _resolveRepoIndex(repoIndex), LogType.RecreateGitIndex, (dirPath) async {
       final file = File("$dirPath/$gitIndexPath");
       if (await file.exists()) await file.delete();
+      final lockFile = File("$dirPath/$gitLockPath");
+      if (await lockFile.exists()) await lockFile.delete();
       await GitManagerRs.recreateDeletedIndex(pathString: dirPath);
     });
   }

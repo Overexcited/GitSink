@@ -13,6 +13,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../constant/dimens.dart';
 import 'package:GitSync/api/manager/auth/github_manager.dart';
 import 'package:GitSync/api/manager/storage.dart';
+import 'package:GitSync/ui/dialog/info_dialog.dart' as InfoDialog;
+import 'package:GitSync/ui/component/button_setting.dart';
+import 'package:GitSync/api/manager/premium_manager.dart';
 
 const double _featureCardHeight =
     spaceXXXS * 2 +
@@ -384,7 +387,7 @@ class _UnlockPremiumState extends ConsumerState<UnlockPremium> {
                         constraints: BoxConstraints(minHeight: constraints.maxHeight),
                         child: Column(
                           children: [
-                            SizedBox(height: spaceLG),
+                            SizedBox(height: spaceXS),
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: spaceLG, vertical: spaceMD),
                               child: SizedBox(
@@ -401,7 +404,7 @@ class _UnlockPremiumState extends ConsumerState<UnlockPremium> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.only(bottom: spaceXL),
+                              padding: EdgeInsets.only(bottom: spaceLG),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: List.generate(cards.length, (index) {
@@ -417,6 +420,35 @@ class _UnlockPremiumState extends ConsumerState<UnlockPremium> {
                                     ),
                                   );
                                 }),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: spaceMD, left: spaceLG, right: spaceLG),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      FaIcon(FontAwesomeIcons.solidHeart, color: colours.premiumAccent, size: textXS),
+                                      SizedBox(width: spaceXS),
+                                      Text(
+                                        t.premiumIndieDevTitle.toUpperCase(),
+                                        style: TextStyle(color: colours.premiumAccent, fontSize: textXS, fontWeight: FontWeight.w900),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: spaceXS),
+                                  Text(
+                                    t.premiumIndieDevSubtitle,
+                                    style: TextStyle(
+                                      color: colours.premiumTextSecondary,
+                                      fontSize: textXS,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'AtkinsonHyperlegible',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
                             Padding(

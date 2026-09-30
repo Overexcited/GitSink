@@ -65,6 +65,12 @@ class FileExplorerState extends State<FileExplorer> with WidgetsBindingObserver 
     controller: controller,
     hideHiddenEntity: false,
     loadingScreen: Center(child: CircularProgressIndicator(color: colours.primaryLight)),
+    emptyFolder: Center(
+      child: Text(
+        t.filesNotFound.toUpperCase(),
+        style: TextStyle(color: colours.secondaryLight, fontWeight: FontWeight.bold, fontSize: textLG),
+      ),
+    ),
     builder: (context, snapshot) {
       final List<FileSystemEntity> entities = snapshot;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -370,9 +376,14 @@ class FileExplorerState extends State<FileExplorer> with WidgetsBindingObserver 
   }
 
   void reload() {
-    final normalised = controller.getCurrentPath.replaceFirst(RegExp(r'/$'), '');
-    controller.setCurrentPath = normalised;
+    final root = widget.path.replaceFirst(RegExp(r'/$'), '');
+    var normalised = controller.getCurrentPath.replaceFirst(RegExp(r'/$'), '');
+    if (!normalised.startsWith(root)) normalised = root;
+    while (normalised.length > root.length && !Directory(normalised).existsSync()) {
+      normalised = p.dirname(normalised);
+    }
     controller.setCurrentPath = "$normalised/";
+    controller.setCurrentPath = normalised;
   }
 
   @override
@@ -715,7 +726,7 @@ class FileExplorerState extends State<FileExplorer> with WidgetsBindingObserver 
 
                                                   try {
                                                     if (entity == FileSystemEntityType.directory) {
-                                                      await Directory(path).delete();
+                                                      await Directory(path).delete(recursive: true);
                                                     } else {
                                                       await File(path).delete();
                                                     }

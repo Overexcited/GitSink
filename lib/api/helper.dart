@@ -93,6 +93,13 @@ Widget getBackButton(BuildContext context, Function() onPressed) => IconButton(
   icon: FaIcon(FontAwesomeIcons.arrowLeft, color: colours.primaryLight, size: textLG, semanticLabel: t.backLabel),
 );
 
+Widget getOpenInBrowserButton(String? url) => url == null
+    ? const SizedBox.shrink()
+    : IconButton(
+        onPressed: () => launchUrl(Uri.parse(url)),
+        icon: FaIcon(FontAwesomeIcons.arrowUpRightFromSquare, color: colours.primaryLight, size: textMD, semanticLabel: t.launchInBrowser),
+      );
+
 void debounce(String index, int milliseconds, VoidCallback callback) {
   debounceTimers[index]?.cancel();
   _callbacks[index] = callback;
@@ -756,10 +763,6 @@ RemoteScheme detectRemoteScheme(String? url) {
   return RemoteScheme.unknown;
 }
 
-/// Returns a token describing the direction of a remote-URL/auth mismatch, or
-/// null when the pair is compatible or the URL's scheme isn't detectable.
-/// - 'httpsWithSshAuth': remote URL is http(s), provider is SSH.
-/// - 'sshWithHttpsAuth': remote URL is ssh/git@, provider is a http-based one.
 String? remoteAuthMismatch(String? url, GitProvider? provider) {
   if (provider == null) return null;
   final scheme = detectRemoteScheme(url);
